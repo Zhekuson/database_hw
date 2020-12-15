@@ -1,0 +1,239 @@
+Enum winner_condition {
+  top3 [note: 'only 3 people with higher results']
+  max [note: 'only people with maximum result']
+  10p [note: 'top 10 percent']
+  20p [note: 'top 20 percent']
+}
+
+Enum subject {
+  programming
+  mathematics
+  english
+  russian
+  literature
+  physics
+  geography
+}
+
+//----------------------------------------------//
+
+Table users as U {
+  id int [pk, increment]
+  name nvarchar(30) [not null]
+  surname nvarchar(30) [not null]
+  middle_name nvarchar(30)
+  birth_date datetime
+  class int
+  is_graduate bool
+  email nvarchar(55)
+  photo varbinary
+}
+
+Table olimpiads as O {
+  id int [pk, increment]
+  name nvarchar(100)
+  logo varbinary
+  level int
+  university_id int
+}
+
+Table olympiad_subjects as OSUBJ { 
+  olympiad_id int
+  subject subject
+  Indexes {
+    (olympiad_id, subject) [pk]
+  }
+}
+
+Table olimpiad_rounds as ORND {
+  id int
+  olympiad_id int
+  is_online bool
+  registration_date datetime
+  registration_end_date datetime
+  start_date datetime
+  end_date datetime
+  place nvarchar(100)
+  is_final bit
+  Indexes {
+    (id, olympiad_id) [pk]
+  }
+}
+
+Table olympiad_criteria as OCRIT { 
+  round_id int
+  diploma_level nvarchar(50)
+  min_score int
+}
+
+Table olympiad_bonuses as OBONUS { 
+  olympiad_id int
+  university_id int
+  
+  diploma_level nvarchar(50)
+  //BVI, +n points
+  bonus_type nvarchar(50)
+  bonus_points int
+  Indexes {
+    (university_id, olympiad_id) [pk]
+  }
+}
+
+Table user_olimpiad as UINO { 
+  user_id int
+  olympiad_id int
+  result varchar(20)
+  score int
+  Indexes {
+    (user_id, olympiad_id) [pk]
+  }
+}
+
+Table friends as F {
+  first_id int
+  second_id int
+  start_date datetime
+  Indexes {
+    (first_id, second_id) [pk]
+  }
+}
+
+Table staff as STAFF {
+  id int [pk, increment]
+  name nvarchar(30) [not null]
+  surname nvarchar(30) [not null]
+  middle_name nvarchar(30)
+  birth_date datetime
+  email nvarchar(50)
+  photo varbinary
+  is_tutor bool
+  position nvarchar(50)
+  price int
+}
+
+Table staff_university as STUNV {
+  staff_id int
+  university_id int
+  Indexes {
+    (staff_id, university_id) [pk]
+  }
+}
+
+Table staff_olympiad as STOLYMP { 
+  olympiad_id int
+  staff_id int
+  Indexes {
+    (staff_id, olympiad_id) [pk]
+  }
+}
+
+Table staff_subject as STSUBJ {
+  staff_id int
+  subject subject
+  Indexes {
+    (staff_id, subject) [pk]
+  }
+}
+
+Table staff_student as STSTUD { 
+  staff_id int
+  user_id int
+  is_active bool
+  start_date datetime
+  end_date datetime
+  Indexes {
+    (staff_id, user_id) [pk]
+  }
+}
+
+Table university as UNV {
+  id int [pk, increment]
+  full_name narchar(255)
+  address nvarchar(255)
+  phone varchar(20)
+  email nvarchar(50)
+}
+
+Table course_olympiad as CRSOLYMP {
+  id int [pk, increment]
+  olympiad_id int
+  staff_id int
+  subject subject
+  school_class int
+  url nvarchar(255)
+}
+
+Table user_round as UR {
+  id int [pk, increment]
+  user_id int
+  round_id int
+  registration_date datetime
+  //Approved, processing
+  status nvarchar(20)
+}
+
+Table registration_data_unit as RDU { 
+  registration_id int 
+  key nvarchar(255)
+  value nvarchar(255)
+  Indexes {
+    (registration_id, key) [pk]
+  }
+}
+
+Table required_registration_rata as RRD {
+  registration_id int
+  key nvarchar(255)
+  value nvarchar(255)
+  Indexes {
+    (registration_id, key) [pk]
+  }
+}
+
+
+Ref: O.id < ORND.olympiad_id
+
+Ref: O.university_id < UNV.id
+
+Ref: OBONUS.olympiad_id < O.id
+
+Ref: UNV.id < OBONUS.university_id
+
+Ref: ORND.id < OCRIT.round_id
+
+Ref: U.id < UINO.user_id
+
+Ref: UINO.olympiad_id < O.id
+
+Ref: STUNV.university_id < UNV.id
+
+Ref: STUNV.staff_id < STAFF.id
+
+Ref: STOLYMP.olympiad_id < O.id
+
+Ref: STOLYMP.staff_id < STAFF.id
+
+Ref: U.id < F.first_id
+
+Ref: U.id < F.second_id
+
+Ref: STSTUD.staff_id < STAFF.id
+
+Ref: STSTUD.user_id < U.id
+
+Ref: STAFF.id < STSUBJ.staff_id
+
+Ref: OSUBJ.olympiad_id < O.id
+
+Ref: O.id < CRSOLYMP.olympiad_id
+
+Ref: STAFF.id < CRSOLYMP.staff_id
+
+Ref: U.id < UR.user_id
+
+Ref: ORND.id < UR.round_id
+
+Ref: UR.id < RDU.registration_id
+
+Ref: UR.id < RRD.registration_id
+//----------------------------------------------//
