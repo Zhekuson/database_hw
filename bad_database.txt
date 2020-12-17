@@ -1,0 +1,77 @@
+Table users as U {
+  id int [pk, increment]
+  name nvarchar(30) [not null]
+  surname nvarchar(30) [not null]
+  middle_name nvarchar(30)
+  birth_date datetime
+  class int
+  is_graduate bool
+  email nvarchar(55)
+  photo varbinary
+  //string of olimpiads ids
+  olimpiad_ids_list nvarchar(255)
+  //string of friends ids
+  firends_ids nvarchar(255)
+  //array of registrations
+  registrations nvarchar(255)
+}
+
+Table olimpiads as O {
+  id int [pk, increment]
+  name nvarchar(100)
+  logo varbinary
+  level int
+  university_id int
+  //array of subjects
+  subjects nvarchar(255)
+  //string of rounds
+  rounds nvarchar(255)
+  //string of criterias 
+  criterias nvarchar(255)
+  //olympiad_bonuses
+  bonuses  nvarchar(255)
+}
+
+Table staff as STAFF {
+  id int [pk, increment]
+  name nvarchar(30) [not null]
+  surname nvarchar(30) [not null]
+  middle_name nvarchar(30)
+  birth_date datetime
+  email nvarchar(50)
+  photo varbinary
+  is_tutor bool
+  position nvarchar(50)
+  price int
+  //array of universities for which the staff work
+  universities_ids nvarchar(255)
+  //array of olimpiads for which staff work
+  olympiads_ids nvarchar(255)
+  //array of subjects
+  subjects nvarchar(255)
+}
+
+Table university as UNV {
+  id int [pk, increment]
+  full_name narchar(255)
+  address nvarchar(255)
+  phone varchar(20)
+  email nvarchar(50)
+}
+
+Table course_olympiad as CRSOLYMP {
+  id int [pk, increment]
+  olympiad_id int
+  staff_id int
+  subject subject
+  school_class int
+  url nvarchar(255)
+}
+
+
+
+Ref: O.university_id < UNV.id
+
+Ref: O.id < CRSOLYMP.olympiad_id
+
+Ref: STAFF.id < CRSOLYMP.staff_id
