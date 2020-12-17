@@ -1,10 +1,3 @@
-Enum winner_condition {
-  top3 [note: 'only 3 people with higher results']
-  max [note: 'only people with maximum result']
-  10p [note: 'top 10 percent']
-  20p [note: 'top 20 percent']
-}
-
 Enum subject {
   programming
   mathematics
@@ -15,23 +8,22 @@ Enum subject {
   geography
 }
 
-//----------------------------------------------//
+/---------------------------------/
 
 Table users as U {
   id int [pk, increment]
   name nvarchar(30) [not null]
-  surname nvarchar(30) [not null]
+  surname nvarchar(30)
   middle_name nvarchar(30)
   birth_date datetime
   class int
-  is_graduate bool
-  email nvarchar(55)
+  email nvarchar(20)
   photo varbinary
 }
 
 Table olimpiads as O {
   id int [pk, increment]
-  name nvarchar(100)
+  name nvarchar(30)
   logo varbinary
   level int
   university_id int
@@ -45,7 +37,7 @@ Table olympiad_subjects as OSUBJ {
   }
 }
 
-Table olimpiad_rounds as ORND {
+Table olimpiad_rounds as ORND  {
   id int
   olympiad_id int
   is_online bool
@@ -62,8 +54,11 @@ Table olimpiad_rounds as ORND {
 
 Table olympiad_criteria as OCRIT { 
   round_id int
-  diploma_level nvarchar(50)
+  diploma_level nvarchar(20)
   min_score int
+  Indexes {
+    (round_id, diploma_level) [pk]
+  }
 }
 
 Table olympiad_bonuses as OBONUS { 
@@ -79,7 +74,7 @@ Table olympiad_bonuses as OBONUS {
   }
 }
 
-Table user_olimpiad as UINO { 
+Table user_participation_in_olimpiad as UINO { 
   user_id int
   olympiad_id int
   result varchar(20)
@@ -98,142 +93,143 @@ Table friends as F {
   }
 }
 
-Table staff as STAFF {
+Table tutors {
   id int [pk, increment]
+  university_id int
   name nvarchar(30) [not null]
-  surname nvarchar(30) [not null]
+  surname nvarchar(30)
   middle_name nvarchar(30)
   birth_date datetime
-  email nvarchar(50)
+  email nvarchar(20)
   photo varbinary
-  is_tutor bool
-  position nvarchar(50)
   price int
 }
 
-Table staff_university as STUNV {
-  staff_id int
-  university_id int
-  Indexes {
-    (staff_id, university_id) [pk]
-  }
-}
-
-Table staff_olympiad as STOLYMP { 
-  olympiad_id int
-  staff_id int
-  Indexes {
-    (staff_id, olympiad_id) [pk]
-  }
-}
-
-Table staff_subject as STSUBJ {
-  staff_id int
+Table tutors_subject {
+  tutor_id int
   subject subject
   Indexes {
-    (staff_id, subject) [pk]
+    (tutor_id, subject) [pk]
   }
 }
 
-Table staff_student as STSTUD { 
-  staff_id int
+Table tutors_student { 
+  tutor_id int
   user_id int
-  is_active bool
+  is_active_relation bit
   start_date datetime
   end_date datetime
   Indexes {
-    (staff_id, user_id) [pk]
+    (tutor_id, user_id) [pk]
   }
 }
 
 Table university as UNV {
   id int [pk, increment]
-  full_name narchar(255)
-  address nvarchar(255)
-  phone varchar(20)
-  email nvarchar(50)
+  full_name varchar
+  address varchar
+  phone varchar
+  email nvarchar
 }
 
-Table course_olympiad as CRSOLYMP {
+Table university_worker {
   id int [pk, increment]
+  university_id int
+  name nvarchar(30) [not null]
+  surname nvarchar(30)
+  middle_name nvarchar(30)
+  birth_date datetime
+  email nvarchar(20)
+  photo varbinary
+  position nvarchar(40)
+}
+
+Table responsible_workers_for_olympiad { 
   olympiad_id int
-  staff_id int
-  subject subject
-  school_class int
-  url nvarchar(255)
+  worker_id int
+  Indexes {
+    (olympiad_id, worker_id) [pk]
+  }
 }
 
-Table user_round as UR {
-  id int [pk, increment]
+Table course_for_olympiad as CRSOLYMP {
+  olympiad_id int
+  tutor_id int
+  subject_id subject
+  for_which_class int
+  url nvarchar(50)
+  Indexes {
+    (olympiad_id, tutor_id) [pk]
+  }
+}
+
+Table user_round_registration as URR  {
+  id int
   user_id int
   round_id int
   registration_date datetime
   //Approved, processing
-  status nvarchar(20)
+  status nvarchar(50)
+  Indexes {
+    (user_id, round_id) [pk]
+  }
 }
 
 Table registration_data_unit as RDU { 
-  registration_id int 
-  key nvarchar(255)
-  value nvarchar(255)
+  round_id int
+  key nvarchar(40)
+  value nvarchar(40)
   Indexes {
-    (registration_id, key) [pk]
+    (round_id, key) [pk]
   }
 }
 
-Table required_registration_rata as RRD {
+Table filled_registration_data as FRD {
   registration_id int
-  key nvarchar(255)
-  value nvarchar(255)
+  key nvarchar(40)
+  value nvarchar(40)
   Indexes {
     (registration_id, key) [pk]
   }
 }
 
+Ref: "tutors_subject"."tutor_id" < "tutors"."id"
 
-Ref: O.id < ORND.olympiad_id
+Ref: "university"."id" < "olympiad_bonuses"."university_id"
 
-Ref: O.university_id < UNV.id
+Ref: "olimpiads"."id" < "olympiad_subjects"."olympiad_id"
 
-Ref: OBONUS.olympiad_id < O.id
+Ref: "course_for_olympiad"."olympiad_id" < "olimpiads"."id"
 
-Ref: UNV.id < OBONUS.university_id
+Ref: "course_for_olympiad"."tutor_id" < "tutors"."id"
 
-Ref: ORND.id < OCRIT.round_id
 
-Ref: U.id < UINO.user_id
+Ref: "user_participation_in_olimpiad"."user_id" < "users"."id"
 
-Ref: UINO.olympiad_id < O.id
+Ref: "user_participation_in_olimpiad"."olympiad_id" < "olimpiads"."id"
 
-Ref: STUNV.university_id < UNV.id
+Ref: "olimpiad_rounds"."olympiad_id" < "olimpiads"."id"
 
-Ref: STUNV.staff_id < STAFF.id
+Ref: "tutors_student"."tutor_id" < "tutors"."id"
 
-Ref: STOLYMP.olympiad_id < O.id
+Ref: "tutors_student"."user_id" < "users"."id"
 
-Ref: STOLYMP.staff_id < STAFF.id
+Ref: "olimpiads"."id" < "responsible_workers_for_olympiad"."olympiad_id"
 
-Ref: U.id < F.first_id
+Ref: "university_worker"."id" < "responsible_workers_for_olympiad"."worker_id"
 
-Ref: U.id < F.second_id
+Ref: "user_round_registration"."user_id" < "users"."id"
 
-Ref: STSTUD.staff_id < STAFF.id
+Ref: "user_round_registration"."round_id" < "olimpiad_rounds"."id"
 
-Ref: STSTUD.user_id < U.id
+Ref: "olympiad_criteria"."round_id" < "olimpiad_rounds"."id"
 
-Ref: STAFF.id < STSUBJ.staff_id
+Ref: "friends"."first_id" < "users"."id"
 
-Ref: OSUBJ.olympiad_id < O.id
+Ref: "friends"."second_id" < "users"."id"
 
-Ref: O.id < CRSOLYMP.olympiad_id
+Ref: "university_worker"."university_id" < "university"."id"
 
-Ref: STAFF.id < CRSOLYMP.staff_id
+Ref: "filled_registration_data"."registration_id" < "user_round_registration"."id"
 
-Ref: U.id < UR.user_id
-
-Ref: ORND.id < UR.round_id
-
-Ref: UR.id < RDU.registration_id
-
-Ref: UR.id < RRD.registration_id
-//----------------------------------------------//
+Ref: "registration_data_unit"."round_id" < "olimpiad_rounds"."id"
